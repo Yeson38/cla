@@ -1,0 +1,31 @@
+name: Update Clash Subscription
+
+on:
+  schedule:
+    # 每天北京时间早上 8:00 和晚上 20:00 自动运行（GitHub使用UTC时间，8:00 UTC = 16:00 北京时间）
+    - cron: '0 0,12 * * *'
+  workflow_dispatch: # 允许手动点击按钮立即运行
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run fetch script
+        run: python fetch_sub.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add latest.yaml
+          # 如果文件没有变化，git commit 会失败，这里加 || exit 0 避免报错
+          git commit -m "Auto update subscription $(date +'%Y-%m-%d')" || exit 0
+          git push
