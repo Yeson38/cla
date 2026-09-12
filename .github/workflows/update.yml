@@ -26,6 +26,10 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add latest.yaml
-          # 如果文件没有变化，git commit 会失败，这里加 || exit 0 避免报错
-          git commit -m "Auto update subscription $(date +'%Y-%m-%d')" || exit 0
-          git push
+          # 如果文件内容没有变化，跳过提交，直接退出
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "文件没有变化，跳过提交"
+          else
+            git commit -m "Auto update subscription $(date +'%Y-%m-%d')"
+            git push
+          fi
